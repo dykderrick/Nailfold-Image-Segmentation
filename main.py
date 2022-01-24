@@ -21,13 +21,13 @@ def main(config):
     config.result_path = os.path.join(config.result_path, config.model_type)
     if not os.path.exists(config.result_path):
         os.makedirs(config.result_path)
-    
-    lr = random.random()*0.0005 + 0.0000005
-    augmentation_prob= random.random()*0.7
+
+    lr = random.random() * 0.0005 + 0.0000005
+    augmentation_prob = random.random() * 0.7
     # epoch = random.choice([100,150,200,250])
     epoch = config.num_epochs
-    decay_ratio = random.random()*0.8
-    decay_epoch = int(epoch*decay_ratio)
+    decay_ratio = random.random() * 0.8
+    decay_epoch = int(epoch * decay_ratio)
 
     config.augmentation_prob = augmentation_prob
     # config.num_epochs = epoch
@@ -71,10 +71,10 @@ if __name__ == '__main__':
     parser.add_argument('--image_size', type=int, default=224)
     parser.add_argument('--t', type=int, default=3, help='t for Recurrent step of R2U_Net or R2AttU_Net')
 
-    # training hyper-parameters
+    # hyperparameter
     parser.add_argument('--img_ch', type=int, default=3)
     parser.add_argument('--output_ch', type=int, default=1)
-    parser.add_argument('--num_epochs', type=int, default=3)
+    parser.add_argument('--num_epochs', type=int, default=5)
     parser.add_argument('--num_epochs_decay', type=int, default=7)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--num_workers', type=int, default=8)
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('--val_step', type=int, default=2)
 
     # misc
-    parser.add_argument('--mode', type=str, default='test')
+    parser.add_argument('--mode', type=str, default='test')  # train, test
     parser.add_argument('--model_type', type=str, default='U_Net', help='U_Net/R2U_Net/AttU_Net/R2AttU_Net')
     parser.add_argument('--model_path', type=str, default='./models')
     parser.add_argument('--train_path', type=str, default='./dataset/train/')
