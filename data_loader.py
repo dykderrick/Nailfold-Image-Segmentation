@@ -1,12 +1,10 @@
 import os
 import random
-from random import shuffle
-import numpy as np
-import torch
+
+from PIL import Image
 from torch.utils import data
 from torchvision import transforms as T
 from torchvision.transforms import functional as F
-from PIL import Image
 
 
 class ImageFolder(data.Dataset):
@@ -26,69 +24,70 @@ class ImageFolder(data.Dataset):
     def __getitem__(self, index):
         """Reads an image from a file and preprocesses it and returns."""
         image_path = self.image_paths[index]
-        filename = image_path.split('_')[-1][:-len(".jpg")]
-        GT_path = self.GT_paths + 'ISIC_' + filename + '_segmentation.png'
+        ground_truth_path = self.GT_paths + os.path.splitext(image_path.split('/')[-1])[0] + '_mask.png'
 
         image = Image.open(image_path)
-        GT = Image.open(GT_path)
+        ground_truth = Image.open(ground_truth_path)
 
         aspect_ratio = image.size[1] / image.size[0]
 
-        Transform = []
+        transform = []
 
-        ResizeRange = random.randint(300, 320)
-        Transform.append(T.Resize((int(ResizeRange * aspect_ratio), ResizeRange)))
+        resize_range = random.randint(300, 320)
+        transform.append(T.Resize((int(resize_range * aspect_ratio), resize_range)))
         p_transform = random.random()
 
         if (self.mode == 'train') and p_transform <= self.augmentation_prob:
-            RotationDegree = random.randint(0, 3)
-            RotationDegree = self.RotationDegree[RotationDegree]
-            if (RotationDegree == 90) or (RotationDegree == 270):
+            rotation_degree = random.randint(0, 3)
+            rotation_degree = self.RotationDegree[rotation_degree]
+            if (rotation_degree == 90) or (rotation_degree == 270):
                 aspect_ratio = 1 / aspect_ratio
 
-            Transform.append(T.RandomRotation((RotationDegree, RotationDegree)))
+            transform.append(T.RandomRotation((rotation_degree, rotation_degree)))
 
-            RotationRange = random.randint(-10, 10)
-            Transform.append(T.RandomRotation((RotationRange, RotationRange)))
-            CropRange = random.randint(250, 270)
-            Transform.append(T.CenterCrop((int(CropRange * aspect_ratio), CropRange)))
-            Transform = T.Compose(Transform)
+            rotation_range = random.randint(-10, 10)
+            transform.append(T.RandomRotation((rotation_range, rotation_range)))
+            crop_range = random.randint(250, 270)
+            transform.append(T.CenterCrop((int(crop_range * aspect_ratio), crop_range)))
+            transform = T.Compose(transform)
 
-            image = Transform(image)
-            GT = Transform(GT)
+            image = transform(image)
+            ground_truth = transform(ground_truth)
 
-            ShiftRange_left = random.randint(0, 20)
-            ShiftRange_upper = random.randint(0, 20)
-            ShiftRange_right = image.size[0] - random.randint(0, 20)
-            ShiftRange_lower = image.size[1] - random.randint(0, 20)
-            image = image.crop(box=(ShiftRange_left, ShiftRange_upper, ShiftRange_right, ShiftRange_lower))
-            GT = GT.crop(box=(ShiftRange_left, ShiftRange_upper, ShiftRange_right, ShiftRange_lower))
+            shift_range_left = random.randint(0, 20)
+            shift_range_upper = random.randint(0, 20)
+            shift_range_right = image.size[0] - random.randint(0, 20)
+            shift_range_lower = image.size[1] - random.randint(0, 20)
+            image = image.crop(box=(shift_range_left, shift_range_upper, shift_range_right, shift_range_lower))
+            ground_truth = ground_truth.crop(
+                box=(shift_range_left, shift_range_upper, shift_range_right, shift_range_lower)
+            )
 
             if random.random() < 0.5:
                 image = F.hflip(image)
-                GT = F.hflip(GT)
+                ground_truth = F.hflip(ground_truth)
 
             if random.random() < 0.5:
                 image = F.vflip(image)
-                GT = F.vflip(GT)
+                ground_truth = F.vflip(ground_truth)
 
-            Transform = T.ColorJitter(brightness=0.2, contrast=0.2, hue=0.02)
+            transform = T.ColorJitter(brightness=0.2, contrast=0.2, hue=0.02)
 
-            image = Transform(image)
+            image = transform(image)
 
-            Transform = []
+            transform = []
 
-        Transform.append(T.Resize((int(256 * aspect_ratio) - int(256 * aspect_ratio) % 16, 256)))
-        Transform.append(T.ToTensor())
-        Transform = T.Compose(Transform)
+        transform.append(T.Resize((int(256 * aspect_ratio) - int(256 * aspect_ratio) % 16, 256)))
+        transform.append(T.ToTensor())
+        transform = T.Compose(transform)
 
-        image = Transform(image)
-        GT = Transform(GT)
+        image = transform(image)
+        ground_truth = transform(ground_truth)
 
-        Norm_ = T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        image = Norm_(image)
+        norm_ = T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        image = norm_(image)
 
-        return image, GT
+        return image, ground_truth
 
     def __len__(self):
         """Returns the total number of font files."""
