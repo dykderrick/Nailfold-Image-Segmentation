@@ -109,7 +109,7 @@ class Solver(object):
         # ===========================================================================================#
 
         unet_path = os.path.join(self.model_path, '%s-%d-%.4f-%d-%.4f.pkl' % (
-        self.model_type, self.num_epochs, self.lr, self.num_epochs_decay, self.augmentation_prob))
+            self.model_type, self.num_epochs, self.lr, self.num_epochs_decay, self.augmentation_prob))
 
         # U-Net Train
         if os.path.isfile(unet_path):
@@ -135,7 +135,7 @@ class Solver(object):
                 DC = 0.  # Dice Coefficient
                 length = 0
 
-                for i, (images, GT) in enumerate(self.train_loader):
+                for i, (images, GT, image_name) in enumerate(self.train_loader):
                     # GT : Ground Truth
 
                     images = images.to(self.device)
@@ -198,7 +198,7 @@ class Solver(object):
                 JS = 0.  # Jaccard Similarity
                 DC = 0.  # Dice Coefficient
                 length = 0
-                for i, (images, GT) in enumerate(self.valid_loader):
+                for i, (images, GT, image_name) in enumerate(self.valid_loader):
                     images = images.to(self.device)
                     GT = GT.to(self.device)
                     SR = sigmoid(self.unet(images))
@@ -222,7 +222,7 @@ class Solver(object):
                 unet_score = JS + DC
 
                 print('[Validation] Acc: %.4f, SE: %.4f, SP: %.4f, PC: %.4f, F1: %.4f, JS: %.4f, DC: %.4f' % (
-                acc, SE, SP, PC, F1, JS, DC))
+                    acc, SE, SP, PC, F1, JS, DC))
 
                 '''
 				torchvision.utils.save_image(images.data.cpu(),
@@ -261,7 +261,7 @@ class Solver(object):
             JS = 0.  # Jaccard Similarity
             DC = 0.  # Dice Coefficient
             length = 0
-            for i, (images, GT) in enumerate(self.valid_loader):
+            for i, (images, GT, image_name) in enumerate(self.valid_loader):
                 images = images.to(self.device)
                 GT = GT.to(self.device)
                 SR = sigmoid(self.unet(images))
@@ -299,11 +299,12 @@ class Solver(object):
         self.unet.train(False)
         self.unet.eval()
 
-        for i, (images, GT) in enumerate(self.test_loader):
+        for i, (images, GT, image_name) in enumerate(self.test_loader):
             images = images.to(self.device)
             GT = GT.to(self.device)
             SR = sigmoid(self.unet(images))  # Segmentation Result
 
             origin_image = T.Compose([T.ToPILImage()])(SR[0])  # TODO: Maybe resize back to its original size
-            cv2.imwrite(result_path + "segmentation" + str(i) + ".png", np.array(origin_image))
+            result_image_path = result_path + image_name[0] + "-prediction" + ".png"
+            cv2.imwrite(result_image_path, np.array(origin_image))
             print(result_path + "segmentation" + str(i) + ".png")

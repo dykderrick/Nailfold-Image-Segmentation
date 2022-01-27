@@ -23,8 +23,10 @@ class ImageFolder(data.Dataset):
 
     def __getitem__(self, index):
         """Reads an image from a file and preprocesses it and returns."""
+
         image_path = self.image_paths[index]
-        ground_truth_path = self.GT_paths + os.path.splitext(image_path.split('/')[-1])[0] + '_mask.png'
+        image_name = os.path.splitext(image_path.split('/')[-1])[0]
+        ground_truth_path = self.GT_paths + image_name + '_mask.png'
 
         image = Image.open(image_path)
         ground_truth = Image.open(ground_truth_path)
@@ -87,7 +89,7 @@ class ImageFolder(data.Dataset):
         norm_ = T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         image = norm_(image)
 
-        return image, ground_truth
+        return image, ground_truth, image_name
 
     def __len__(self):
         """Returns the total number of font files."""
