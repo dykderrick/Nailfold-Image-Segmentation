@@ -86,8 +86,8 @@ if __name__ == '__main__':
     parser.add_argument('--test_ratio', type=float, default=0.2)
 
     # data path
-    parser.add_argument('--origin_data_path', type=str, default='../../yingke-data/nailfold/images/')
-    parser.add_argument('--origin_GT_path', type=str, default='../../yingke-data/nailfold/masks')
+    parser.add_argument('--origin_data_path', type=str, default='../../yingke-data/nailfold/For-Segmentation/images/')
+    parser.add_argument('--origin_GT_path', type=str, default='../../yingke-data/nailfold/For-Segmentation/masks')
 
     parser.add_argument('--train_path', type=str, default='./dataset/train/')
     parser.add_argument('--train_GT_path', type=str, default='./dataset/train_GT/')
