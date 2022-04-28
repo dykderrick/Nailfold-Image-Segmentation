@@ -304,7 +304,7 @@ class Solver(object):
             GT = GT.to(self.device)
             SR = sigmoid(self.unet(images))  # Segmentation Result
 
-            origin_image = T.Compose([T.ToPILImage()])(SR[0])  # TODO: Maybe resize back to its original size
-            result_image_path = result_path + image_name[0] + "-prediction" + ".png"
-            cv2.imwrite(result_image_path, np.array(origin_image))
-            print(result_path + "segmentation" + str(i) + ".png")
+            predicted_image = T.Compose([T.ToPILImage(), T.Resize((480, 720))])(SR[0])
+            predicted_image_path = result_path + image_name[0] + "-prediction" + ".png"
+            cv2.imwrite(predicted_image_path, np.array(predicted_image))
+            print(predicted_image_path)

@@ -35,7 +35,8 @@ class ImageFolder(data.Dataset):
 
         transform = []
 
-        resize_range = random.randint(300, 320)
+        # resize_range = random.randint(300, 320)
+        resize_range = 256
         transform.append(T.Resize((int(resize_range * aspect_ratio), resize_range)))
         p_transform = random.random()
 
