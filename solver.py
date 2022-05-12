@@ -305,6 +305,10 @@ class Solver(object):
             SR = sigmoid(self.unet(images))  # Segmentation Result
 
             predicted_image = T.Compose([T.ToPILImage(), T.Resize((480, 720))])(SR[0])
-            predicted_image_path = result_path + image_name[0] + "-prediction" + ".png"
-            cv2.imwrite(predicted_image_path, np.array(predicted_image))
+            ret, predicted_image = cv2.threshold(np.array(predicted_image), 63, 255, cv2.THRESH_BINARY)  # filter
+            # predicted_image_path = result_path + image_name[0] + "-prediction.png"
+            predicted_image_path = result_path + image_name[0] + "-prediction-filtered.png"
+            #cv2.imwrite(predicted_image_path, np.array(predicted_image))
+            cv2.imwrite(predicted_image_path, predicted_image)
+
             print(predicted_image_path)
